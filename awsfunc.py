@@ -100,10 +100,8 @@ class AwsApi():
             self.start('service-quotas')
             ret = self.client.get_service_quota(ServiceCode='ec2', QuotaCode='L-1216C47A')
             # ret = aApi.client.list_aws_default_service_quotas(ServiceCode='ec2')
-            print(f"当前配额： {int(ret['Quota']['Value'])}")
-            return True
+            return int(ret['Quota']['Value'])
         except BaseException as e:
-            print(f"配额查询失败 {e}")
             return False
 
     # 获取全部地区
