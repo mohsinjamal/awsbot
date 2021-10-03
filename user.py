@@ -12,8 +12,8 @@ bot = telegram.Bot(token=TOKEN)
 def start(update, context):
     print('进入start函数')
     keyboard = [
-        [InlineKeyboardButton("管理账号", callback_data=str('管理账号')),
-         InlineKeyboardButton("开机", callback_data=str('开机'))]
+        [InlineKeyboardButton("1.账号", callback_data=str('账号')),
+         InlineKeyboardButton("2.开机", callback_data=str('开机'))]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     update.message.reply_text(
@@ -28,7 +28,7 @@ def account_filter(update, context):
     keyboard = []
     conn = sqlite3.connect('awsbot.sqlite3')
     cursor = conn.cursor()
-    cursor.execute("select * from accounts ORDER BY names")#未实现
+    cursor.execute("SELECT * FROM accounts WHERE userid=?", (user_id,))#未实现
     users = cursor.fetchall()
     conn.close()
     for i in users:
@@ -58,10 +58,12 @@ def choose_account(update,context):
     choose = update.callback_query.data
     account_name = context.user_data['account_name']
     if choose=='OK':
-        
-
-
+        account = account_name
+    elif choose=='fanhui':
+        account = None
 
 def add_account(update,context):
-    pass#增加user列并与user——id绑定
+    #增加user列并与user_id绑定
+    user_id = update.message.from_user.id
+
 
