@@ -6,10 +6,13 @@ from awsfunc import AwsApi
 import sqlite3
 import time
 
-ROUTE, MANAGE_ACCOUNT, ADD_ACCOUNT, CHOOSE_ACCOUNT, CHOOSE_COUNTRY, CHOOSE_MODLE, CHOOSE_DISK_SIZE, CHOOSE_QUANTITY, SUBMIT = range(9)
+ROUTE, MANAGE_ACCOUNT, CHOOSE_ACCOUNT, CHOOSE_COUNTRY, CHOOSE_MODLE, CHOOSE_DISK_SIZE, CHOOSE_QUANTITY, SUBMIT = range(8)
 bot = telegram.Bot(token=TOKEN)
 
+
 def start(update, context):
+    global user_id
+    user_id = update.message.from_user.id
     print('进入start函数')
     keyboard = [
         [InlineKeyboardButton("1.选择账号", callback_data=str('账号')),
@@ -17,7 +20,7 @@ def start(update, context):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     update.message.reply_text(
-        'Hi 这里是 @GanFan_aws_bot\n目前只开发了开ec2功能（\nby:@QDistinction',
+        'Hi 这里是 @GanFan_aws_bot\n目前只开发了开ec2功能（支持arm\nby:@QDistinction',
         reply_markup=reply_markup
     )
     return ROUTE
@@ -25,16 +28,15 @@ def start(update, context):
 def account_filter(update, context):
     query = update.callback_query
     query.answer()
-    keyboard = []
+    keyboard = [[InlineKeyboardButton('添加账号', callback_data=str('添加账号'))]]
     conn = sqlite3.connect('awsbot.sqlite3')
     cursor = conn.cursor()
     cursor.execute("SELECT name FROM accounts WHERE userid=?", (user_id,))
     users = cursor.fetchall()
     conn.close()
     for i in users:
-        users_list = [InlineKeyboardButton(i[1], callback_data=str(i[1]))]
+        users_list = [InlineKeyboardButton(i[0], callback_data=str(i[0]))]
         keyboard.append(users_list)
-    keyboard.append("InlineKeyboardButton('添加账号', callback_data='添加账号'")
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(
         text="选择账户",
@@ -45,7 +47,7 @@ def account_filter(update, context):
 def account_info(update,context):
     query = update.callback_query
     query.answer()
-    keyboard = [InlineKeyboardButton("选定", callback_data="选定"), InlineKeyboardButton("取消", callback_data="取消"), InlineKeyboardButton("删除账号", callback_data="删除账号")]
+    keyboard = [[InlineKeyboardButton("选定", callback_data=str("选定")), InlineKeyboardButton("取消", callback_data=str("取消")), InlineKeyboardButton("删除账号", callback_data=str("删除账号"))]]
     account_name = update.callback_query.data
     if account_name == '添加账号':
         add_account()
@@ -53,12 +55,14 @@ def account_info(update,context):
         context.user_data['account_name'] = account_name
         conn = sqlite3.connect('awsbot.sqlite3')
         cursor = conn.cursor()
-        result = cursor.execute("SELECT key_id,key FROM accounts where userid=? and name='?'", (user_id, account_name,))
-        key_id = result[0]
-        key = result[1]
+        result = cursor.execute("SELECT key_id,key FROM accounts where userid=? and name=?", (user_id, account_name,))
+        result = result.fetchall()
+        key_id = result[0][0]
+        key = result[0][1]
         Api = AwsApi(key_id, key)
         quota = Api.get_service_quota()
-        if quota:
+        print(quota)
+        if quota==False:
             query.edit_message_text(
                 text="无法查询账户配额呢！（你号没了\n当前回话已结束\n请重新使用/start发起会话"
             )
@@ -80,7 +84,7 @@ def choose_account(update,context):
     if choose=='选定':
         account = account_name
     elif choose=='取消':
-        return 
+        return 'test'
     elif choose =='删除账号':
         del_account(account_name)
 
@@ -91,3 +95,24 @@ def add_account(update,context):
 def del_account(account_name):
     pass
 
+def cancel():
+    pass
+
+start_handler = ConversationHandler(
+        entry_points=[CommandHandler('start', start)],
+
+        states={
+            ROUTE: [
+                CommandHandler('start', start),
+                CallbackQueryHandler(account_filter, pattern='^' + str('账号') + '$'),
+                CallbackQueryHandler(account_filter, pattern='^' + str('开机') + '$'),
+            ],
+            MANAGE_ACCOUNT: [
+                CommandHandler('start', start),
+                CallbackQueryHandler(account_info, pattern='.*?'),
+            ],
+         #   ConversationHandler.TIMEOUT: [MessageHandler(Filters.all, timeout)],
+        },
+        conversation_timeout=300,
+        fallbacks=[CommandHandler('cancel', cancel)]
+    )

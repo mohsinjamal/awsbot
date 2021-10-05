@@ -1,5 +1,5 @@
 # BOT API
-TOKEN = ''
+TOKEN = '1689914673:AAG7U05esyjb_SezmXwFQAPu1s_unyPdgVE'
 # ADMIN ID
 ADMIN_ID = []
 
