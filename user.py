@@ -160,6 +160,31 @@ def del_account(update,context):
     return ConversationHandler.END
 
 
+def choose_country(update, context):
+    query = update.callback_query
+    query.answer()
+    Api = AwsApi(key_id, key)
+    Api.get_describe_regions()
+    keyboard = []
+    tmp=[]
+    n=0
+    for i in Api.region_list:
+        if n<2:
+            tmp.append(InlineKeyboardButton(i, callback_data=str(i)))
+            n=n+1
+        else:
+            keyboard.append(tmp)
+            n=1
+            tmp = []
+            tmp.append(InlineKeyboardButton(i, callback_data=str(i)))
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(
+        text="选择区域\n未显示即为不支持",
+        reply_markup=reply_markup
+    )
+    return CHOOSE_COUNTRY
+
+
 def cancel(update, context):
     update.message.reply_text('回话已结束， /start重新发起')
     return ConversationHandler.END
@@ -173,7 +198,7 @@ start_handler = ConversationHandler(
             ROUTE: [
                 CommandHandler('start', start),
                 CallbackQueryHandler(account_filter, pattern='^' + str('账号') + '$'),
-                CallbackQueryHandler(account_filter, pattern='^' + str('开机') + '$'),
+                CallbackQueryHandler(choose_country, pattern='^' + str('开机') + '$'),
             ],
             MANAGE_ACCOUNT: [
                 CommandHandler('start', start),
@@ -200,6 +225,10 @@ start_handler = ConversationHandler(
                 CallbackQueryHandler(choose_account, pattern='^' + str('选定') + '$'),
                 CallbackQueryHandler(account_filter, pattern='^' + str('取消') + '$'),
                 CallbackQueryHandler(del_account, pattern='^' + str('删除账号') + '$'),
+            ],
+            CHOOSE_COUNTRY: [
+                CommandHandler('start', start),
+                CallbackQueryHandler(account_info, pattern='.*?')
             ]
          #   ConversationHandler.TIMEOUT: [MessageHandler(Filters.all, timeout)],
         },

@@ -115,7 +115,7 @@ class AwsApi():
             for region in response['Regions']:
                 # print(region)
                 region = region['RegionName']
-                text += f'{region} ---- {regions.get(region, region)}\n'
+                text += f'{regions.get(region, region)}\n'
                 self.region_list.append(region)
             self.region_text = text
             return True
