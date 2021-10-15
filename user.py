@@ -6,7 +6,7 @@ from awsfunc import AwsApi
 import sqlite3
 import time
 
-ROUTE, MANAGE_ACCOUNT, CHOOSE_ACCOUNT, CHOOSE_COUNTRY, CHOOSE_MODLE, CHOOSE_DISK_SIZE, CHOOSE_QUANTITY, SUBMIT = range(8)
+ROUTE, MANAGE_ACCOUNT, ADD_ACCOUNT_STEP1, ADD_ACCOUNT_STEP2, ADD_ACCOUNT_STEP3, CHOOSE_ACCOUNT, CHOOSE_COUNTRY, CHOOSE_MODLE, CHOOSE_DISK_SIZE, CHOOSE_QUANTITY, SUBMIT = range(11)
 bot = telegram.Bot(token=TOKEN)
 
 
@@ -62,10 +62,16 @@ def account_info(update,context):
     quota = Api.get_service_quota()
     print(quota)
     if quota==False:
+        keyboard = [
+            [InlineKeyboardButton("取消", callback_data=str("取消")),
+             InlineKeyboardButton("删除账号", callback_data=str("删除账号"))]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
         query.edit_message_text(
-            text="无法查询账户配额呢！（你号没了\n当前回话已结束\n请重新使用/start发起会话"
+            text="无法查询账户配额呢！（你号没了",
+            reply_markup=reply_markup
         )
-        return ConversationHandler.END
+        return CHOOSE_ACCOUNT
     else:
         reply_markup = InlineKeyboardMarkup(keyboard)
         query.edit_message_text(
@@ -74,10 +80,48 @@ def account_info(update,context):
         )
         return CHOOSE_ACCOUNT
 
-def add_account(update, context):
+def add_account_route(update, context):
     query = update.callback_query
     query.answer()
     query.edit_message_text('请输入账号名称')
+    return ADD_ACCOUNT_STEP1
+
+def add_step_1(update, context):
+    global newname
+    newname = update.message.text
+    conn = sqlite3.connect('awsbot.sqlite3')
+    cursor = conn.cursor()
+    result = cursor.execute("SELECT key_id FROM accounts where userid=? and name=?", (user_id, newname,))
+    result = result.fetchone()
+    conn.close()
+    if result is None:
+        update.message.reply_text('请输入key_id')
+        return ADD_ACCOUNT_STEP2
+    else:
+        update.message.reply_text('名称不能重复，请检查后再试\n当前回话已结束，请重启回话')
+        return ConversationHandler.END
+
+def add_step_2(update, context):
+    global newkeyid
+    newkeyid = update.message.text
+    update.message.reply_text('请输入key setret')
+    return ADD_ACCOUNT_STEP3
+
+def add_step_3(update, context):
+    try:
+        newsecret = update.message.text
+        conn = sqlite3.connect('awsbot.sqlite3')
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO accounts VALUES (?, ?, ?, ?)", (user_id, newkeyid, newsecret, newname))
+        conn.commit()
+        conn.close()
+        update.message.reply_text('添加成功,当前会话已结束，请使用 /start')
+        print(user_id, newkeyid, newsecret, newname)
+        return ConversationHandler.END
+    except Exception as e:
+        update.message.reply_text(str(e))
+        return ConversationHandler.END
+
 
 def choose_account(update,context):
     query = update.callback_query
@@ -85,28 +129,42 @@ def choose_account(update,context):
     global Selected_account_name
     Selected_account_name = context.user_data['account_name']
     query.edit_message_text(
-        text=f"ok\n当前账号：{Selected_account_name}",
+        text=f"ok\n当前账号：{Selected_account_name} \n3s后返回主页",
    )
+    time.sleep(3)
+    keyboard = [
+        [InlineKeyboardButton("1.选择账号", callback_data=str('账号')),
+         InlineKeyboardButton("2.开机", callback_data=str('开机'))]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(
+        'Hi 这里是 @GanFan_aws_bot\n目前只开发了开ec2功能（支持arm\nby:@QDistinction',
+        reply_markup=reply_markup
+    )
+    return ROUTE
 
 
 def del_account(update,context):
     query = update.callback_query
     query.answer()
+    delaccountname = context.user_data['account_name']
+    del context.user_data['account_name']
+    conn = sqlite3.connect('awsbot.sqlite3')
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM Accounts WHERE name=? AND userid=?", (delaccountname, user_id))
+    conn.commit()
+    conn.close()
     query.edit_message_text(
-        text="del ok",
+        text="删除成功，当前回话已结束，请使用 /start",
     )
-
-def cancel_choose(update,context):
-    query = update.callback_query
-    query.answer()
-    del Selected_account_name
-    query.edit_message_text(
-        text="cancel ok",
-    )
-
-
-def cancel():
     return ConversationHandler.END
+
+
+def cancel(update, context):
+    update.message.reply_text('回话已结束， /start重新发起')
+    return ConversationHandler.END
+
+
 
 start_handler = ConversationHandler(
         entry_points=[CommandHandler('start', start)],
@@ -119,8 +177,23 @@ start_handler = ConversationHandler(
             ],
             MANAGE_ACCOUNT: [
                 CommandHandler('start', start),
-                CallbackQueryHandler(account_info, pattern='.*?'),
-                CallbackQueryHandler(add_account, pattern='^'+str('添加账号')+'$')
+                CallbackQueryHandler(add_account_route, pattern='^'+str('添加账号')+'$'),
+                CallbackQueryHandler(account_info, pattern='.*?')
+            ],
+            ADD_ACCOUNT_STEP1: [
+                CommandHandler('start', start),
+                CommandHandler('cancel', cancel),
+                MessageHandler(Filters.text, add_step_1)
+            ],
+            ADD_ACCOUNT_STEP2: [
+                CommandHandler('start', start),
+                CommandHandler('cancel', cancel),
+                MessageHandler(Filters.text, add_step_2)
+            ],
+            ADD_ACCOUNT_STEP3: [
+                CommandHandler('start', start),
+                CommandHandler('cancel', cancel),
+                MessageHandler(Filters.text, add_step_3)
             ],
             CHOOSE_ACCOUNT: [
                 CommandHandler('start', start),
