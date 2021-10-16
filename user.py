@@ -6,7 +6,7 @@ from awsfunc import AwsApi
 import sqlite3
 import time
 
-ROUTE, MANAGE_ACCOUNT, ADD_ACCOUNT_STEP1, ADD_ACCOUNT_STEP2, ADD_ACCOUNT_STEP3, CHOOSE_ACCOUNT, CHOOSE_COUNTRY, CHOOSE_MODLE, CHOOSE_DISK_SIZE, CHOOSE_QUANTITY, SUBMIT = range(11)
+ROUTE, MANAGE_ACCOUNT, ADD_ACCOUNT_STEP1, ADD_ACCOUNT_STEP2, ADD_ACCOUNT_STEP3, CHOOSE_ACCOUNT, CREATE_ROUTE, CHOOSE_REGION, CHOOSE_MODLE, CHOOSE_DISK_SIZE, CHOOSE_OS, CHOOSE_QUANTITY, SUBMIT = range(13)
 bot = telegram.Bot(token=TOKEN)
 
 
@@ -159,10 +159,30 @@ def del_account(update,context):
     )
     return ConversationHandler.END
 
+def create_route(update, context):
+    query = update.callback_query
+    query.answer()
+    if Selected_account_name in dir():
+        query.edit_message_text(
+            text=''
+        )
+    else:
+        query.edit_message_text(text='您还未选择账号，0.3s后将返回主页.....')
+        keyboard = [
+            [InlineKeyboardButton("1.选择账号", callback_data=str('账号')),
+             InlineKeyboardButton("2.开机", callback_data=str('开机'))]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        query.edit_message_text(
+            text='Hi 这里是 @GanFan_aws_bot\n目前只开发了开ec2功能（支持arm\nby:@QDistinction',
+            reply_markup=reply_markup
+        )
+        return ROUTE
 
 def choose_country(update, context):
     query = update.callback_query
     query.answer()
+    global Api
     Api = AwsApi(key_id, key)
     Api.get_describe_regions()
     keyboard = []
@@ -182,8 +202,23 @@ def choose_country(update, context):
         text="选择区域\n未显示即为不支持",
         reply_markup=reply_markup
     )
-    return CHOOSE_COUNTRY
+    return CHOOSE_REGION
 
+
+def choose_modle(update, context):
+    query = update.callback_query
+    query.answer()
+    keyboard = [
+        [InlineKeyboardButton("t2.micro", callback_data=str('t2.micro')),
+         InlineKeyboardButton("t3.micro", callback_data=str('t3.micro'))],
+        [InlineKeyboardButton('其他', callback_data=str('其他'))]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(
+        text="选择实例类型",
+        reply_markup=reply_markup
+    )
+    return CHOOSE_MODLE
 
 def cancel(update, context):
     update.message.reply_text('回话已结束， /start重新发起')
@@ -198,7 +233,7 @@ start_handler = ConversationHandler(
             ROUTE: [
                 CommandHandler('start', start),
                 CallbackQueryHandler(account_filter, pattern='^' + str('账号') + '$'),
-                CallbackQueryHandler(choose_country, pattern='^' + str('开机') + '$'),
+                CallbackQueryHandler(create_route, pattern='^' + str('开机') + '$'),
             ],
             MANAGE_ACCOUNT: [
                 CommandHandler('start', start),
@@ -226,9 +261,17 @@ start_handler = ConversationHandler(
                 CallbackQueryHandler(account_filter, pattern='^' + str('取消') + '$'),
                 CallbackQueryHandler(del_account, pattern='^' + str('删除账号') + '$'),
             ],
-            CHOOSE_COUNTRY: [
+            CREATE_ROUTE: [
                 CommandHandler('start', start),
-                CallbackQueryHandler(account_info, pattern='.*?')
+                CallbackQueryHandler(choose_country, pattern='^'+str('选择区域')+ '$'),
+                CallbackQueryHandler(choose_country, pattern='^'+str('选择实例类型')+ '$'),
+                CallbackQueryHandler(choose_country, pattern='^' + str('选择磁盘大小') + '$'),
+                CallbackQueryHandler(choose_country, pattern='^' + str('选择数量') + '$'),
+                CallbackQueryHandler(choose_country, pattern='^'+str('选择镜像')+ '$')
+            ],
+            CHOOSE_REGION: [
+                CommandHandler('start', start),
+                CallbackQueryHandler(choose_modle, pattern='.*?')
             ]
          #   ConversationHandler.TIMEOUT: [MessageHandler(Filters.all, timeout)],
         },
