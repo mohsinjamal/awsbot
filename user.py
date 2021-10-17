@@ -164,6 +164,7 @@ def create_route(update, context):
     query.answer()
     try:
         str(Selected_account_name)
+        global Selected_modle_name, Selected_region_name, Selected_disk_size, Selected_os, Selected_quantity
         Selected_modle_name = 't2.micro'
         Selected_region_name = 'us-east-2'
         Selected_disk_size = int(8)
@@ -174,15 +175,17 @@ def create_route(update, context):
              InlineKeyboardButton('实例类型', callback_data=str('实例类型'))],
             [InlineKeyboardButton('开机区域', callback_data=str('开机区域')),
              InlineKeyboardButton('磁盘大小', callback_data=str('磁盘大小'))],
-            [InlineKeyboardButton('系统镜像', callback_data=str('系统镜像')),
+            [InlineKeyboardButton('选择镜像', callback_data=str('选择镜像')),
              InlineKeyboardButton('开机数量', callback_data=str('开机数量'))],
             [InlineKeyboardButton('检查无误，确认开机', callback_data=str('开机'))]
         ]
-        reply_markup = InlineKeyboardMarkup(keyboard)
+        global create_reply_markup
+        create_reply_markup = InlineKeyboardMarkup(keyboard)
         query.edit_message_text(
             text=f'您正在 开机 页面\n \n当前选中账号={Selected_account_name}\n\n以下为开机信息(预设)\n\n实例类型={Selected_modle_name}\n实例区域={Selected_region_name}\n磁盘大小={Selected_disk_size}\n系统镜像={Selected_os}\n数量={Selected_quantity}',
-            reply_markup=reply_markup
+            reply_markup=create_reply_markup
         )
+        return CREATE_ROUTE
     except NameError:
         query.edit_message_text(text='您还未选择账号，0.3s后将返回主页.....')
         time.sleep(0.2)
@@ -225,22 +228,99 @@ def choose_country(update, context):
 def choose_country_exec(update, context):
     global Selected_region_name
     Selected_region_name = update.callback_query.data
-    create_route(update, context)
+    query = update.callback_query
+    query.answer()
+    query.edit_message_text(text='开机区域 更新成功\n0.3s后返回 开机信息 页面')
+    time.sleep(0.2)
+    query.edit_message_text(
+        text=f'您正在 开机 页面\n \n当前选中账号={Selected_account_name}\n\n以下为开机信息(预设)\n\n实例类型={Selected_modle_name}\n实例区域={Selected_region_name}\n磁盘大小={Selected_disk_size}\n系统镜像={Selected_os}\n数量={Selected_quantity}',
+        reply_markup=create_reply_markup
+    )
+    return CREATE_ROUTE
 
 def choose_modle(update, context):
     query = update.callback_query
     query.answer()
     keyboard = [
         [InlineKeyboardButton("t2.micro", callback_data=str('t2.micro')),
-         InlineKeyboardButton("t3.micro", callback_data=str('t3.micro'))],
-        [InlineKeyboardButton('其他', callback_data=str('其他'))]
+         InlineKeyboardButton("t3.micro", callback_data=str('t3.micro'))]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(
-        text="选择实例类型",
+        text="选择实例类型\n\nps:其他类型请直接输入",
         reply_markup=reply_markup
     )
     return CHOOSE_MODLE
+
+def choose_modle_exec_1(update,context):
+    query = update.callback_query
+    query.answer()
+    global Selected_modle_name
+    Selected_modle_name = update.callback_query.data
+    query.edit_message_text(text='实例类型 更新成功\n0.3s后返回 开机信息 页面')
+    time.sleep(0.2)
+    query.edit_message_text(
+        text=f'您正在 开机 页面\n \n当前选中账号={Selected_account_name}\n\n以下为开机信息(预设)\n\n实例类型={Selected_modle_name}\n实例区域={Selected_region_name}\n磁盘大小={Selected_disk_size}\n系统镜像={Selected_os}\n数量={Selected_quantity}',
+        reply_markup=create_reply_markup
+    )
+    return CREATE_ROUTE
+
+def choose_modle_exec_2(update, context):
+    global Selected_modle_name
+    Selected_modle_name = update.message.text
+    update.message.reply_text(text='实例类型 更新成功\n0.3s后返回 开机信息 页面')
+    time.sleep(0.2)
+    update.message.reply_text(
+        text=f'您正在 开机 页面\n \n当前选中账号={Selected_account_name}\n\n以下为开机信息(预设)\n\n实例类型={Selected_modle_name}\n实例区域={Selected_region_name}\n磁盘大小={Selected_disk_size}\n系统镜像={Selected_os}\n数量={Selected_quantity}',
+        reply_markup=create_reply_markup
+    )
+    return CREATE_ROUTE
+
+def choose_disk_size(update, context):
+    query = update.callback_query
+    query.answer()
+    query.edit_message_text(text='请输入磁盘大小 单位：GB')
+    return CHOOSE_DISK_SIZE
+
+def choose_disk_size_exec(update, context):
+    try:
+        global Selected_disk_size
+        Selected_disk_size = int(update.message.text)
+        update.message.reply_text(text='磁盘大小 更新成功\n0.3s后返回 开机信息 页面')
+        time.sleep(0.2)
+        update.message.reply_text(
+            text=f'您正在 开机 页面\n \n当前选中账号={Selected_account_name}\n\n以下为开机信息(预设)\n\n实例类型={Selected_modle_name}\n实例区域={Selected_region_name}\n磁盘大小={Selected_disk_size}\n系统镜像={Selected_os}\n数量={Selected_quantity}',
+            reply_markup=create_reply_markup
+         )
+        return CREATE_ROUTE
+    except ValueError:
+        update.message.reply_text(text='请正确输入磁盘大小 ps：数字！！！\n0.3s后返回 开机信息 页面')
+        time.sleep(0.2)
+        update.message.reply_text(
+            text=f'您正在 开机 页面\n \n当前选中账号={Selected_account_name}\n\n以下为开机信息(预设)\n\n实例类型={Selected_modle_name}\n实例区域={Selected_region_name}\n磁盘大小={Selected_disk_size}\n系统镜像={Selected_os}\n数量={Selected_quantity}',
+            reply_markup=create_reply_markup
+         )
+        return CREATE_ROUTE
+
+def choose_quantity(update, context):
+    query = update.callback_query
+    query.answer()
+    query.edit_message_text(text='请输入数量 必须为数字')
+    return CHOOSE_QUANTITY
+
+def choose_quantity_exec(update, context):
+    try:
+        global Selected_quantity
+        Selected_quantity = int(update.message.text)
+        update.message.reply_text(text='磁盘大小 更新成功\n0.3s后返回 开机信息 页面')
+        time.sleep(0.2)
+        update.message.reply_text(
+            text=f'您正在 开机 页面\n \n当前选中账号={Selected_account_name}\n\n以下为开机信息(预设)\n\n实例类型={Selected_modle_name}\n实例区域={Selected_region_name}\n磁盘大小={Selected_disk_size}\n系统镜像={Selected_os}\n数量={Selected_quantity}',
+            reply_markup=create_reply_markup
+        )
+        return CREATE_ROUTE
+    except ValueError:
+        
 
 def cancel(update, context):
     update.message.reply_text('回话已结束， /start重新发起')
@@ -285,15 +365,26 @@ start_handler = ConversationHandler(
             ],
             CREATE_ROUTE: [
                 CommandHandler('start', start),
-                CallbackQueryHandler(choose_country, pattern='^'+str('选择区域')+ '$'),
-                CallbackQueryHandler(choose_country, pattern='^'+str('选择实例类型')+ '$'),
-                CallbackQueryHandler(choose_country, pattern='^' + str('选择磁盘大小') + '$'),
-                CallbackQueryHandler(choose_country, pattern='^' + str('选择数量') + '$'),
-                CallbackQueryHandler(choose_country, pattern='^'+str('选择镜像')+ '$')
+                CallbackQueryHandler(choose_country, pattern='^'+str('重新选择账号')+ '$'),
+                CallbackQueryHandler(choose_country, pattern='^'+str('开机区域')+ '$'),
+                CallbackQueryHandler(choose_modle, pattern='^'+str('实例类型')+ '$'),
+                CallbackQueryHandler(choose_disk_size, pattern='^' + str('磁盘大小') + '$'),
+                CallbackQueryHandler(choose_quantity, pattern='^' + str('开机数量') + '$'),
+                CallbackQueryHandler(choose_country, pattern='^'+str('选择镜像')+ '$'),
+                CallbackQueryHandler(choose_country, pattern='^'+str('开机')+ '$'),
             ],
             CHOOSE_REGION: [
                 CommandHandler('start', start),
                 CallbackQueryHandler(choose_country_exec, pattern='.*?')
+            ],
+            CHOOSE_MODLE: [
+                CommandHandler('start', start),
+                CallbackQueryHandler(choose_modle_exec_1, pattern='.*?'),
+                MessageHandler(Filters.text, choose_modle_exec_2)
+            ],
+            CHOOSE_DISK_SIZE:[
+                CommandHandler('start',start),
+                MessageHandler(Filters.text, choose_disk_size_exec)
             ]
          #   ConversationHandler.TIMEOUT: [MessageHandler(Filters.all, timeout)],
         },
