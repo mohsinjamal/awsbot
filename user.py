@@ -162,11 +162,12 @@ def del_account(update,context):
 def create_route(update, context):
     query = update.callback_query
     query.answer()
-    if Selected_account_name in dir():
+    try:
+        str(Selected_account_name)
         Selected_modle_name = 't2.micro'
         Selected_region_name = 'us-east-2'
         Selected_disk_size = int(8)
-        Selected_os = 'ubuntu 20'
+        Selected_os = 'ubuntu 18.04'
         Selected_quantity = int(1)
         keyboard = [
             [InlineKeyboardButton('选择账号', callback_data=str('选择账号')),
@@ -179,12 +180,22 @@ def create_route(update, context):
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         query.edit_message_text(
-            text=f'您正在 开机 页面\n \n 当前选中账号{Selected_account_name}\n\n以下为开机信息\n\n实例类型={Selected_modle_name}\n实例区域={Selected_region_name}\n磁盘大小={Selected_disk_size}\n系统镜像={Selected_os}\n数量={Selected_quantity}',
+            text=f'您正在 开机 页面\n \n当前选中账号={Selected_account_name}\n\n以下为开机信息(预设)\n\n实例类型={Selected_modle_name}\n实例区域={Selected_region_name}\n磁盘大小={Selected_disk_size}\n系统镜像={Selected_os}\n数量={Selected_quantity}',
             reply_markup=reply_markup
         )
-    else:
+    except NameError:
         query.edit_message_text(text='您还未选择账号，0.3s后将返回主页.....')
-        start(update, context)
+        time.sleep(0.2)
+        keyboard = [
+            [InlineKeyboardButton("1.选择账号", callback_data=str('账号')),
+             InlineKeyboardButton("2.开机", callback_data=str('开机'))]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        query.edit_message_text(
+            text='Hi 这里是 @GanFan_aws_bot\n目前只开发了开ec2功能（支持arm\nby:@QDistinction',
+            reply_markup=reply_markup
+        )
+        return ROUTE
 
 def choose_country(update, context):
     query = update.callback_query
