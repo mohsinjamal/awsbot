@@ -164,14 +164,15 @@ def create_route(update, context):
     query.answer()
     try:
         str(Selected_account_name)
-        global Selected_modle_name, Selected_region_name, Selected_disk_size, Selected_os, Selected_quantity
+        global Selected_modle_name, Selected_region_name, Selected_disk_size, Selected_os, Selected_quantity, Selected_type
         Selected_modle_name = 't2.micro'
+        Selected_type = 'x86'
         Selected_region_name = 'us-east-2'
         Selected_disk_size = int(8)
         Selected_os = 'ubuntu 18.04'
         Selected_quantity = int(1)
         keyboard = [
-            [InlineKeyboardButton('选择账号', callback_data=str('选择账号')),
+            [InlineKeyboardButton('选择架构', callback_data=str('选择架构')),
              InlineKeyboardButton('实例类型', callback_data=str('实例类型'))],
             [InlineKeyboardButton('开机区域', callback_data=str('开机区域')),
              InlineKeyboardButton('磁盘大小', callback_data=str('磁盘大小'))],
@@ -182,7 +183,7 @@ def create_route(update, context):
         global create_reply_markup
         create_reply_markup = InlineKeyboardMarkup(keyboard)
         query.edit_message_text(
-            text=f'您正在 开机 页面\n \n当前选中账号={Selected_account_name}\n\n以下为开机信息(预设)\n\n实例类型={Selected_modle_name}\n实例区域={Selected_region_name}\n磁盘大小={Selected_disk_size}\n系统镜像={Selected_os}\n数量={Selected_quantity}',
+            text=f'您正在 开机 页面\n \n当前选中账号={Selected_account_name}\n\n以下为开机信息(预设)\n\n实例类型={Selected_modle_name}\n实例区域={Selected_region_name}\n架构={Selected_type}磁盘大小={Selected_disk_size}\n系统镜像={Selected_os}\n数量={Selected_quantity}',
             reply_markup=create_reply_markup
         )
         return CREATE_ROUTE
@@ -233,7 +234,7 @@ def choose_country_exec(update, context):
     query.edit_message_text(text='开机区域 更新成功\n0.3s后返回 开机信息 页面')
     time.sleep(0.2)
     query.edit_message_text(
-        text=f'您正在 开机 页面\n \n当前选中账号={Selected_account_name}\n\n以下为开机信息(预设)\n\n实例类型={Selected_modle_name}\n实例区域={Selected_region_name}\n磁盘大小={Selected_disk_size}\n系统镜像={Selected_os}\n数量={Selected_quantity}',
+        text=f'您正在 开机 页面\n \n当前选中账号={Selected_account_name}\n\n以下为开机信息(预设)\n\n实例类型={Selected_modle_name}\n实例区域={Selected_region_name}\n架构={Selected_type}磁盘大小={Selected_disk_size}\n系统镜像={Selected_os}\n数量={Selected_quantity}',
         reply_markup=create_reply_markup
     )
     return CREATE_ROUTE
@@ -260,7 +261,7 @@ def choose_modle_exec_1(update,context):
     query.edit_message_text(text='实例类型 更新成功\n0.3s后返回 开机信息 页面')
     time.sleep(0.2)
     query.edit_message_text(
-        text=f'您正在 开机 页面\n \n当前选中账号={Selected_account_name}\n\n以下为开机信息(预设)\n\n实例类型={Selected_modle_name}\n实例区域={Selected_region_name}\n磁盘大小={Selected_disk_size}\n系统镜像={Selected_os}\n数量={Selected_quantity}',
+        text=f'您正在 开机 页面\n \n当前选中账号={Selected_account_name}\n\n以下为开机信息(预设)\n\n实例类型={Selected_modle_name}\n实例区域={Selected_region_name}\n架构={Selected_type}磁盘大小={Selected_disk_size}\n系统镜像={Selected_os}\n数量={Selected_quantity}',
         reply_markup=create_reply_markup
     )
     return CREATE_ROUTE
@@ -271,7 +272,7 @@ def choose_modle_exec_2(update, context):
     update.message.reply_text(text='实例类型 更新成功\n0.3s后返回 开机信息 页面')
     time.sleep(0.2)
     update.message.reply_text(
-        text=f'您正在 开机 页面\n \n当前选中账号={Selected_account_name}\n\n以下为开机信息(预设)\n\n实例类型={Selected_modle_name}\n实例区域={Selected_region_name}\n磁盘大小={Selected_disk_size}\n系统镜像={Selected_os}\n数量={Selected_quantity}',
+        text=f'您正在 开机 页面\n \n当前选中账号={Selected_account_name}\n\n以下为开机信息(预设)\n\n实例类型={Selected_modle_name}\n实例区域={Selected_region_name}\n架构={Selected_type}磁盘大小={Selected_disk_size}\n系统镜像={Selected_os}\n数量={Selected_quantity}',
         reply_markup=create_reply_markup
     )
     return CREATE_ROUTE
@@ -289,7 +290,7 @@ def choose_disk_size_exec(update, context):
         update.message.reply_text(text='磁盘大小 更新成功\n0.3s后返回 开机信息 页面')
         time.sleep(0.2)
         update.message.reply_text(
-            text=f'您正在 开机 页面\n \n当前选中账号={Selected_account_name}\n\n以下为开机信息(预设)\n\n实例类型={Selected_modle_name}\n实例区域={Selected_region_name}\n磁盘大小={Selected_disk_size}\n系统镜像={Selected_os}\n数量={Selected_quantity}',
+            text=f'您正在 开机 页面\n \n当前选中账号={Selected_account_name}\n\n以下为开机信息(预设)\n\n实例类型={Selected_modle_name}\n实例区域={Selected_region_name}\n架构={Selected_type}磁盘大小={Selected_disk_size}\n系统镜像={Selected_os}\n数量={Selected_quantity}',
             reply_markup=create_reply_markup
          )
         return CREATE_ROUTE
@@ -297,7 +298,7 @@ def choose_disk_size_exec(update, context):
         update.message.reply_text(text='请正确输入磁盘大小 ps：数字！！！\n0.3s后返回 开机信息 页面')
         time.sleep(0.2)
         update.message.reply_text(
-            text=f'您正在 开机 页面\n \n当前选中账号={Selected_account_name}\n\n以下为开机信息(预设)\n\n实例类型={Selected_modle_name}\n实例区域={Selected_region_name}\n磁盘大小={Selected_disk_size}\n系统镜像={Selected_os}\n数量={Selected_quantity}',
+            text=f'您正在 开机 页面\n \n当前选中账号={Selected_account_name}\n\n以下为开机信息(预设)\n\n实例类型={Selected_modle_name}\n实例区域={Selected_region_name}\n架构={Selected_type}磁盘大小={Selected_disk_size}\n系统镜像={Selected_os}\n数量={Selected_quantity}',
             reply_markup=create_reply_markup
          )
         return CREATE_ROUTE
@@ -315,12 +316,71 @@ def choose_quantity_exec(update, context):
         update.message.reply_text(text='磁盘大小 更新成功\n0.3s后返回 开机信息 页面')
         time.sleep(0.2)
         update.message.reply_text(
-            text=f'您正在 开机 页面\n \n当前选中账号={Selected_account_name}\n\n以下为开机信息(预设)\n\n实例类型={Selected_modle_name}\n实例区域={Selected_region_name}\n磁盘大小={Selected_disk_size}\n系统镜像={Selected_os}\n数量={Selected_quantity}',
+            text=f'您正在 开机 页面\n \n当前选中账号={Selected_account_name}\n\n以下为开机信息(预设)\n\n实例类型={Selected_modle_name}\n实例区域={Selected_region_name}\n架构={Selected_type}磁盘大小={Selected_disk_size}\n系统镜像={Selected_os}\n数量={Selected_quantity}',
             reply_markup=create_reply_markup
         )
         return CREATE_ROUTE
     except ValueError:
-        
+        update.message.reply_text(text='磁盘大小 更新失败\n0.3s后返回 开机信息 页面')
+        time.sleep(0.2)
+        update.message.reply_text(
+            text=f'您正在 开机 页面\n \n当前选中账号={Selected_account_name}\n\n以下为开机信息(预设)\n\n实例类型={Selected_modle_name}\n实例区域={Selected_region_name}\n架构={Selected_type}磁盘大小={Selected_disk_size}\n系统镜像={Selected_os}\n数量={Selected_quantity}',
+            reply_markup=create_reply_markup
+        )
+        return CREATE_ROUTE
+
+def choose_os(update, context):
+    query = update.callback_query
+    query.answer()
+    keyboard = [
+        [InlineKeyboardButton('Centos 7', callback_data=str('Centos 7')),
+         InlineKeyboardButton('Ubuntu 18.04', callback_data=str('Ubuntu 18.04'))],
+        [InlineKeyboardButton('Windows Server 2019', callback_data=str('Windows Server 2019'))]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(
+        text='选一个?',
+        reply_markup=reply_markup
+    )
+    return CHOOSE_OS
+
+def choose_os_exec(update, context):
+    query = update.callback_query
+    query.answer()
+    global Selected_os
+    Selected_os = update.callback_query.data
+    query.edit_message_text(text='系统镜像 更新成功\n0.3s后返回 开机信息 页面')
+    time.sleep(0.2)
+    query.edit_message_text(
+        text=f'您正在 开机 页面\n \n当前选中账号={Selected_account_name}\n\n以下为开机信息\n\n实例类型={Selected_modle_name}\n实例区域={Selected_region_name}\n磁盘大小={Selected_disk_size}\n系统镜像={Selected_os}\n数量={Selected_quantity}',
+        reply_markup=create_reply_markup
+    )
+    return CREATE_ROUTE
+
+
+
+def submit(update, context):
+    query = update.callback_query
+    query.answer()
+    query.edit_message_text(text='我明白了，正在开机\n\n（若数量较多请稍等几分钟唔')
+    Api.region = Selected_region_name
+    Api.start()
+    instance_list = []
+    for n in range(Selected_quantity):
+        status = Api.ec2_create_instances(Selected_modle_name, disk_size=Selected_disk_size, _type=Selected_type)
+        if not status:
+            query.edit_message_text(text='创建失败唔')
+            return ConversationHandler.END
+        else:
+            for num in range(20):
+                if Api.get_instance(Api.instance_id):
+                    instance_list.append(f'实例ID: {Api.instance_id}, 实例IP: {Api.ip},')
+    text = ''
+    for i in instance_list:
+        text = text+i+'\n'
+    query.edit_message_text(
+        text= f'{text}\n 密码都为 ganfanawsbottest'
+    )
 
 def cancel(update, context):
     update.message.reply_text('回话已结束， /start重新发起')
@@ -370,8 +430,8 @@ start_handler = ConversationHandler(
                 CallbackQueryHandler(choose_modle, pattern='^'+str('实例类型')+ '$'),
                 CallbackQueryHandler(choose_disk_size, pattern='^' + str('磁盘大小') + '$'),
                 CallbackQueryHandler(choose_quantity, pattern='^' + str('开机数量') + '$'),
-                CallbackQueryHandler(choose_country, pattern='^'+str('选择镜像')+ '$'),
-                CallbackQueryHandler(choose_country, pattern='^'+str('开机')+ '$'),
+                CallbackQueryHandler(choose_os, pattern='^'+str('选择镜像')+ '$'),
+                CallbackQueryHandler(submit, pattern='^'+str('开机')+ '$'),
             ],
             CHOOSE_REGION: [
                 CommandHandler('start', start),
@@ -382,9 +442,17 @@ start_handler = ConversationHandler(
                 CallbackQueryHandler(choose_modle_exec_1, pattern='.*?'),
                 MessageHandler(Filters.text, choose_modle_exec_2)
             ],
-            CHOOSE_DISK_SIZE:[
-                CommandHandler('start',start),
+            CHOOSE_DISK_SIZE: [
+                CommandHandler('start', start),
                 MessageHandler(Filters.text, choose_disk_size_exec)
+            ],
+            CHOOSE_OS: [
+                CommandHandler('start', start),
+                CallbackQueryHandler(choose_os_exec, pattern='.*?')
+            ],
+            CHOOSE_QUANTITY: [
+                CommandHandler('start', start),
+                MessageHandler(Filters.text, choose_quantity_exec)
             ]
          #   ConversationHandler.TIMEOUT: [MessageHandler(Filters.all, timeout)],
         },
