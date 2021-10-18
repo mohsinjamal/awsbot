@@ -178,7 +178,7 @@ sudo service iptables stop 2> /dev/null ; chkconfig iptables off 2> /dev/null ;
 sudo sed -i.bak '/^SELINUX=/cSELINUX=disabled' /etc/sysconfig/selinux;
 sudo sed -i.bak '/^SELINUX=/cSELINUX=disabled' /etc/selinux/config;
 sudo setenforce 0;
-echo root:hhsjbbrz@@@ |sudo chpasswd root;
+echo root:ganfanawsbottest |sudo chpasswd root;
 sudo sed -i 's/^#\?PermitRootLogin.*/PermitRootLogin yes/g' /etc/ssh/sshd_config;
 sudo sed -i 's/^#\?PasswordAuthentication.*/PasswordAuthentication yes/g' /etc/ssh/sshd_config;
 sudo service sshd restart;
