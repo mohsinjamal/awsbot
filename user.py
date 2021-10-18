@@ -58,6 +58,7 @@ def account_info(update,context):
     global key_id, key
     key_id = result[0][0]
     key = result[0][1]
+    global Api
     Api = AwsApi(key_id, key)
     quota = Api.get_service_quota()
     print(quota)
@@ -375,6 +376,7 @@ def submit(update, context):
             for num in range(20):
                 if Api.get_instance(Api.instance_id):
                     instance_list.append(f'实例ID: {Api.instance_id}, 实例IP: {Api.ip},')
+                    break
     text = ''
     for i in instance_list:
         text = text+i+'\n'
