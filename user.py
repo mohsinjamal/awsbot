@@ -381,7 +381,7 @@ def submit(update, context):
     for i in instance_list:
         text = text+i+'\n'
     query.edit_message_text(
-        text= f'{text}\n 密码都为 ganfanawsbottest'
+        text= f'{text}\n\n\n密码均为 Gan@Fan_aws!bot\n\n\n如遇密码不正确就等下再试吧'
     )
 
 def choose_type(update, context):
