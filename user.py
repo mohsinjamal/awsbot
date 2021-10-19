@@ -1,10 +1,12 @@
-import telegram
-from telegram import InlineKeyboardMarkup, InlineKeyboardButton, ForceReply
-from telegram.ext import CommandHandler, MessageHandler, Filters, ConversationHandler, CallbackQueryHandler
-from config import TOKEN
-from awsfunc import AwsApi
 import sqlite3
 import time
+
+import telegram
+from telegram import InlineKeyboardMarkup, InlineKeyboardButton
+from telegram.ext import CommandHandler, MessageHandler, Filters, ConversationHandler, CallbackQueryHandler
+
+from awsfunc import AwsApi
+from config import TOKEN
 
 ROUTE, MANAGE_ACCOUNT, ADD_ACCOUNT_STEP1, ADD_ACCOUNT_STEP2, ADD_ACCOUNT_STEP3, CHOOSE_ACCOUNT, CREATE_ROUTE, CHOOSE_REGION, CHOOSE_MODLE, CHOOSE_DISK_SIZE, CHOOSE_OS, CHOOSE_QUANTITY, CHOOSE_TYPE, SUBMIT = range(14)
 bot = telegram.Bot(token=TOKEN)
@@ -13,6 +15,13 @@ bot = telegram.Bot(token=TOKEN)
 def start(update, context):
     global user_id
     user_id = update.message.from_user.id
+    global Selected_modle_name, Selected_region_name, Selected_disk_size, Selected_os, Selected_quantity, Selected_type
+    Selected_modle_name = 't2.micro'
+    Selected_type = 'x86'
+    Selected_region_name = 'us-east-2'
+    Selected_disk_size = int(8)
+    Selected_os = 'ubuntu 18.04'
+    Selected_quantity = int(1)
     print('进入start函数')
     keyboard = [
         [InlineKeyboardButton("1.选择账号", callback_data=str('账号')),
@@ -165,13 +174,6 @@ def create_route(update, context):
     query.answer()
     try:
         str(Selected_account_name)
-        global Selected_modle_name, Selected_region_name, Selected_disk_size, Selected_os, Selected_quantity, Selected_type
-        Selected_modle_name = 't2.micro'
-        Selected_type = 'x86'
-        Selected_region_name = 'us-east-2'
-        Selected_disk_size = int(8)
-        Selected_os = 'ubuntu 18.04'
-        Selected_quantity = int(1)
         keyboard = [
             [InlineKeyboardButton('选择架构', callback_data=str('选择架构')),
              InlineKeyboardButton('实例类型', callback_data=str('实例类型'))],
@@ -333,11 +335,14 @@ def choose_quantity_exec(update, context):
 def choose_os(update, context):
     query = update.callback_query
     query.answer()
+    '''
     keyboard = [
         [InlineKeyboardButton('Centos 7', callback_data=str('Centos 7')),
          InlineKeyboardButton('Ubuntu 18.04', callback_data=str('Ubuntu 18.04'))],
         [InlineKeyboardButton('Windows Server 2019', callback_data=str('Windows Server 2019'))]
     ]
+    '''
+    keyboard = [InlineKeyboardButton('Ubuntu 18.04', callback_data=str('Ubuntu 18.04'))]
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(
         text='选一个?',
